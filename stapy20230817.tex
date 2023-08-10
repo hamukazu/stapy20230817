@@ -2,7 +2,11 @@
 \usepackage{luatexja}
 \renewcommand{\kanjifamilydefault}{\gtdefault}
 \usetheme[numbering=fraction]{metropolis}
-\title{{\tt math}と{\tt numpy}の話}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\hypersetup{colorlinks,linkcolor=,urlcolor=blue}
+\usepackage{geometry}
+\title{{\tt math}と{\tt NumPy}の話}
 \subtitle{みんなのPython勉強会資料}
 \date{}
 \author{加藤公一}
@@ -13,12 +17,77 @@
 \begin{frame}[fragile]{自己紹介}
 \end{frame}
 \begin{frame}[fragile]{今日の話}
+  Pythonのライブラリ{\tt math}と{\tt NumPy}について
   \begin{itemize}
-  \item {\tt math}ってなに？{\tt numpy}ってなに？
-  \item {\tt math}と{\tt numpy}で何ができる？
-  \item {\tt numpy}でできて{\tt math}でできないこと
-  \item {\tt math}でできて{\tt numpy}でできないこと
-  \item {\tt math}と{\tt numpy}の最近の進化
+  \item {\tt math}ってなに？{\tt NumPy}ってなに？
+  \item {\tt math}と{\tt NumPy}で何ができる？
+  \item {\tt NumPy}でできて{\tt math}でできないこと
+  \item {\tt math}でできて{\tt NumPy}でできないこと
+  \item {\tt math}と{\tt NumPy}の最近の進化
   \end{itemize}
 \end{frame}
+\begin{frame}[fragile]{{\tt math}とは？}
+  オフィシャルサイトの説明：
+  \begin{quote}
+    This module provides access to the mathematical functions defined by the C standard.
+  \end{quote}
+
+  つまり、C言語の標準ライブラリmathで定義されている関数へのアクセスを提供する。
+
+  {\tt math}はPythonの\emph{標準ライブラリ}（つまりPythonをインストールするとついてくる）
+\end{frame}
+\begin{frame}[fragile]{C言語のmathライブラリについて}
+  C言語のmathライブラリの関数一覧はWikipedia参照：\newline
+  {\tiny \url{https://en.wikipedia.org/wiki/C_mathematical_functions}}
+
+$\cos(\pi)$をCとPythonで計算してみる。
+\begin{minipage}[t]{0.45 \textwidth}
+\fontsize{6pt}{6pt}\selectfont    
+\noindent  
+C言語
+\begin{verbatim}
+#include <math.h>
+#include <stdio.h>
+
+int main()
+{
+  printf("%f\n", cos(M_PI));
+}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[t]{0.45 \textwidth}
+\fontsize{6pt}{6pt}\selectfont    
+\noindent  
+Python
+\begin{verbatim}
+import math
+
+print(math.cos(math.pi))
+\end{verbatim}
+\end{minipage}
+\end{frame}
+\begin{frame}[fragile]{C言語の{\tt math}とPythonの{\tt math}の差分}
+\noindent
+PythonにあってCにないものの例
+\begin{itemize}
+\item \verb|factorial|: 階乗（$n!$）を計算
+\item \verb|comb|: ${}_nC_k$を計算
+\item \verb|perm|: ${}_nP_k$を計算
+\item \verb|nlp|:（あとで説明します）
+\end{itemize}
+CにあってPythonにないものの例
+\begin{itemize}
+\item \verb|div|: 整数の割り算で商とあまりを同時に計算する（Pythonは\verb|divmod|が同じ機能）
+\end{itemize}
+以上を見ると、Pythonの\verb|math|はCの\verb|math|の機能をできるだけカバーしようとしているが、独自で便利そうな関数も揃えている。
+\end{frame}
+\begin{fraame}[fragile]{{\tt NumPy}とは？}
+  オフィシャルサイトのキャッチフレーズ：
+  \begin{quote}
+    The fundamental package for scientific computing with Python
+  \end{quote}
+
+  配列（array）とその操作に関する機能が特徴的（これは\verb|math|にはない機能）
+\end{frame}
+\begin{frame}[fragile]{{\tt NumPy}の配列でなにができるか}
 \end{document}
