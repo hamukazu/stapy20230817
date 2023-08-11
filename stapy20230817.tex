@@ -17,16 +17,16 @@
 \begin{frame}[fragile]{自己紹介}
 \end{frame}
 \begin{frame}[fragile]{今日の話}
-  Pythonのライブラリ{\tt math}と{\tt NumPy}について
+  PythonのライブラリmathとNumPyについて
   \begin{itemize}
-  \item {\tt math}ってなに？{\tt NumPy}ってなに？
-  \item {\tt math}と{\tt NumPy}で何ができる？
-  \item {\tt NumPy}でできて{\tt math}でできないこと
-  \item {\tt math}でできて{\tt NumPy}でできないこと
-  \item {\tt math}と{\tt NumPy}の最近の進化
+  \item mathってなに？NumPyってなに？
+  \item mathとNumPyで何ができる？
+  \item NumPyでできてmathでできないこと
+  \item mathでできてNumPyでできないこと
+  \item mathとNumPyの最近の進化
   \end{itemize}
 \end{frame}
-\begin{frame}[fragile]{{\tt math}とは？}
+\begin{frame}[fragile]{mathとは？}
   オフィシャルサイトの説明：
   \begin{quote}
     This module provides access to the mathematical functions defined by the C standard.
@@ -66,7 +66,7 @@ print(math.cos(math.pi))
 \end{verbatim}
 \end{minipage}
 \end{frame}
-\begin{frame}[fragile]{C言語の{\tt math}とPythonの{\tt math}の差分}
+\begin{frame}[fragile]{C言語のmathとPythonのmathの差分}
 \noindent
 PythonにあってCにないものの例
 \begin{itemize}
@@ -79,16 +79,78 @@ CにあってPythonにないものの例
 \begin{itemize}
 \item \verb|div|: 整数の割り算で商とあまりを同時に計算する（Pythonは\verb|divmod|が同じ機能）
 \end{itemize}
-以上を見ると、Pythonの\verb|math|はCの\verb|math|の機能をできるだけカバーしようとしているが、独自で便利そうな関数も揃えている。
+以上を見ると、PythonのmathはCのmathの機能をできるだけカバーしようとしているが、独自で便利そうな関数も揃えている。
 \end{frame}
-\begin{frame}[fragile]{{\tt NumPy}とは？}
+\begin{frame}[fragile]{NumPyとは？}
   オフィシャルサイトのキャッチフレーズ：
   \begin{quote}
     The fundamental package for scientific computing with Python
   \end{quote}
 
   配列（array）とその操作に関する機能が特徴的（これは\verb|math|にはない機能）
+
+
+  mathに含まれる関数はほぼNumPyにも含まれている。
+  （例：sin, cos, exp, log, ...）
 \end{frame}
-\begin{frame}[fragile]{{\tt NumPy}の配列でなにができるか}
+\begin{frame}[fragile]{NumPyの配列の機能1：Vectorization}
+配列に数値を作用させたときに自動的にベクトル化される  
+\fontsize{10pt}{10pt}\selectfont    
+\begin{verbatim}
+>>> import numpy as np
+>>> a = np.array([1,2,3])
+>>> b = 5
+>>> a + b
+array([6, 7, 8])
+\end{verbatim}
+\end{frame}
+\begin{frame}[fragile]{NumPyの配列の機能2：Broadcasting}
+配列の演算が要素ごとの演算として解釈される
+\fontsize{10pt}{10pt}\selectfont    
+\begin{verbatim}
+>>> import numpy as np
+>>> a = np.array([1,2,3])
+>>> b = np.array([4,5,6])
+>>> a + b
+array([5, 7, 9])
+>>> a * b
+array([ 4, 10, 18])
+\end{verbatim}
+\end{frame}
+\begin{frame}[fragile]{NumPyの配列の機能3：Indexing}
+  複数のインデクスを一度に指定して要素を取り出せる
+\fontsize{10pt}{10pt}\selectfont    
+\begin{verbatim}
+>>> import numpy as np
+>>> idx = np.array([1,3,5])
+>>> a = np.array([10,20,30,40,50,60])
+>>> a[idx]
+array([20, 40, 60])
+\end{verbatim}  
+\end{frame}
+\begin{frame}[fragile]{mathとNumPyの使い分け}
+  例えば、expを計算するときに{\tt math.exp}と{\tt numpy.exp}のどちらを使うべきか。\vspace{1cm}
+
+
+結論：どちらでもよいし、あまり悩む必要ない。
+
+ただし、
+  \begin{itemize}
+  \item mathよりNumPyのほうが高機能なので、NumPyが当然動くことが期待されている環境では、何も考えずNumPyを使ったほうがよいかも（判断コスト、思考コストの低減）
+  \item NumPyは外部モジュールであることに注意。依存ライブラリも含めてリリースする場合（例えば、Windowsのインストーラを作るとき、AWS Lambdaで使うとき）は、不必要なのにNumPyを含めるのは無駄にファイルが大きくなる。
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]{ここまでのまとめ}
+  \begin{itemize}
+  \item PythonのmathはC言語のmathをカバーすることを目標としている
+  \item NumPyのほうがmathより高機能。特に配列機能が特徴的。
+  \item mathはNumPyのほぼサブセットなので、NumPyが使えるような環境では、mathは使わなくてもほぼNumPyだけで完結できる。
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  「mathはNumPyのほぼサブセット」
+
+  
+  「ほぼ」とは？
 \end{frame}
 \end{document}
