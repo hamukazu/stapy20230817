@@ -6,6 +6,7 @@
 \usepackage{xcolor}
 \hypersetup{colorlinks,linkcolor=,urlcolor=blue}
 \usepackage{geometry}
+\usepackage{graphicx}
 \title{{\tt math}と{\tt NumPy}の話}
 \subtitle{みんなのPython勉強会資料}
 \date{}
@@ -38,7 +39,7 @@
 \end{frame}
 \begin{frame}[fragile]{C言語のmathライブラリについて}
   C言語のmathライブラリの関数一覧はWikipedia参照：\newline
-  {\tiny \url{https://en.wikipedia.org/wiki/C_mathematical_functions}}
+  {\tiny \url{https://en.wikipedia.org/wiki/C\_mathematical\_functions}}
 
 $\cos(\pi)$をCとPythonで計算してみる。
 \begin{minipage}[t]{0.45 \textwidth}
@@ -152,5 +153,144 @@ array([20, 40, 60])
 
   
   「ほぼ」とは？
+\end{frame}
+\begin{frame}[fragile]{mathはほんとにnumpyのサブセット？}
+mathにあってnumpyにない関数の一覧を取得してみる。
+{\fontsize{6pt}{6pt}\selectfont    
+\begin{verbatim}
+>>> import mathp
+>>> import numpy as np
+>>> math_funcs = set([x for x in dir(math) if not x.startswith("_")])
+>>> np_funcs = set([x for x in dir(np) if not x.startswith("_")])
+>>> sorted(math_funcs - np_funcs)
+['acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh', 'comb', 
+'dist', 'erf', 'erfc', 'factorial', 'fsum', 'gamma', 'isqrt', 'lgamma',
+'perm', 'pow', 'tau', 'ulp']
+\end{verbatim}
+}
+それなりにある！
+
+以下（網羅的ではなく）中身を見ていきます。
+\end{frame}
+\begin{frame}[fragile]{逆三角関数と逆双曲線関数}
+  $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、$\mathrm{arcsin}$と書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
+
+  
+  $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、$\mathrm{arcsinh}$と書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
+
+  以上、機能としては同じだが関数名が異なっている。
+\end{frame}
+\begin{frame}[fragile]{mathにあり、numpyにはないが、scipyにはあるもの}
+  \verb|math.factorial| → \verb|scipy.special.factorial| （$n!$）
+  
+  \verb|math.comb| → \verb|scipy.special.comb| （${}_n C_k$）
+  
+  \verb|math.perm| → \verb|scipy.special.perm| （${}_n P_k$）
+
+  \verb|math.gamma| → \verb|scipy.special.gamma| （ガンマ関数$\Gamma(x)$）
+  
+  \verb|math.lgamma| → \verb|scipy.special.loggamma| （$\log \Gamma(x)$）
+\end{frame}
+\begin{frame}[fragile]{{\tt math.ulp}}
+  Pythonのドキュメントによる説明：
+  {\small
+  \begin{quote}
+    \noindent math.ulp(x)
+    
+    \hspace{3mm}Return the value of the least significant bit of the float x:
+  \end{quote}
+}
+
+least significant bitはunit in the last place（「最小変化単位」？日本語での一般的な訳はわからず）とも呼ばれ、その値を返す。
+\end{frame}
+\begin{frame}[fragile]{Unit in the last placeってなに？}
+Wikipediaの解説：
+\begin{figure}[!ht]
+\includegraphics[scale=.4]{img/wikipedia-ulp.png}
+\end{figure}
+{\tiny \url{https://en.wikipedia.org/wiki/Unit\_in\_the\_last\_place}}
+
+？？？
+
+言い換えると、与えられた数に足すとコンピュータ内部表現としての数が変化するような数で最小のもの。
+
+実行例：
+{\fontsize{6pt}{6pt}\selectfont    
+\begin{verbatim}
+>>> import math
+>>> math.ulp(1)
+2.220446049250313e-16
+>>> math.ulp(100)
+1.4210854715202004e-14
+>>> math.ulp(1e30)
+140737488355328.0
+\end{verbatim}
+}
+\end{frame}
+\begin{frame}[fragile]{もっと詳しく知るために：浮動小数点数の内部表現}
+  十進法の世界では、アボガドロ数：$6.02\times 10^{23}$のように、科学技術で使う数値は
+  $\square.\square\square\square\square \times 10^{\square\square\square}$のようにされることが多い。
+
+  特に仮数部の一の位がゼロにならないように調整する（例えば$6.02\times 10^{23} =
+  0.602 \times 10^{24}$）
+  
+  二進法でも同様に$\square.\square\square\square\square_{(2)} \times 2^{\square\square\square}$で表す。
+
+  二進法で仮数部の一の位がゼロでないように調整すると、一の位は1しかありえない。
+
+\end{frame}
+\begin{frame}[fragile]
+  IEEE754では倍精度浮動小数点の内部表現を、符号1ビット、指数部11ビット、仮数部52ビットと規定している。
+\begin{figure}[!ht]
+\includegraphics[scale=.1]{img/{IEEE_754_Double_Floating_Point_Format.svg}.png}
+\end{figure}
+
+{\tiny 参照： \url{https://en.wikipedia.org/wiki/Double-precision\_floating-point\_format}}
+
+符号は0:プラス、1:マイナス
+
+指数部を符号なし11ビットとみなした数を$e$とすると、$e-1023$が指数となる（$-1023$以上$1024$以下を表現できる）
+
+仮数は一の位が1として、残りの52ビットを仮数部で表現する。
+
+\[ (-1)^\mathrm{sign} \times (1.b_{51} b_{50} \cdots b_{0})_{(2)} \times 2^{e-1023} \]
+\end{frame}
+\begin{frame}[fragile]
+  例：アボガドロ数（の近似値）$6.02\times 10^{23}$はコンピュータ内部表現ではどうなっているか。
+{\fontsize{6pt}{6pt}\selectfont
+\begin{verbatim}
+>>> import struct
+>>> a = struct.pack(">d",6.02e23) 
+>>> bit_expression = ("").join([("0"*7+bin(b)[2:])[-8:] for b in a])
+>>> bit_expression
+'0100010011011111110111101001111100010000101010001101001101100001'
+>>> bit_expression[0], bit_expression[1:12], bit_expression[12:]
+('0', '10001001101', '1111110111101001111100010000101010001101001101100001')
+\end{verbatim}
+}
+指数部$11111101_{(2)}=1101_{(10)}$なので、指数は$1101-1023=78$となり、つまり、
+\[
+  6.02\times 10^{23} = 1.111111011110100\cdots_{(2)} \times 2^{78}
+\]
+
+ほんとかな？検算してみよう！
+{\fontsize{6pt}{6pt}\selectfont    
+\begin{verbatim}
+>>> 0b11111110111101001111100010000101010001101001101100001/2**52 * 2**78
+6.02e+23
+\end{verbatim}
+}
+\end{frame}
+\begin{frame}[fragile]{もう一度：Unit in the last placeってなに？}
+  与えられた数の、符号を正にして、仮数部を$0.0\dots 001_{(2)}$（小数第52位が1でほかは0）だと思ったもの。
+
+  
+  例：
+  $6.02\times 10^{23}$の内部表現は、
+  {\tiny \[\mathtt{1.1111110111101001111100010000101010001101001101100001}_{(2)} \times 2^{1101-1023}\]}
+  これのULPは
+  {\tiny \[\mathtt{0.0000000000000000000000000000000000000000000000000001}_{(2)} \times 2^{1101-1023}\]}
+
+  したがって、ULPより小さい数を足しても、コンピュータ内部では影響がない。
 \end{frame}
 \end{document}

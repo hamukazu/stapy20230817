@@ -7,6 +7,7 @@ RUN mkdir /work
 RUN mkdir /work/build
 COPY stapy20230817.tex /work
 COPY build.sh /work
+COPY img/ /work/img/
 
 WORKDIR /work
 
