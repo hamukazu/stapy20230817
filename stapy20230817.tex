@@ -242,7 +242,7 @@ Wikipediaの解説：
 \begin{frame}[fragile]
   IEEE754では倍精度浮動小数点の内部表現を、符号1ビット、指数部11ビット、仮数部52ビットと規定している。
 \begin{figure}[!ht]
-\includegraphics[scale=.1]{img/{IEEE_754_Double_Floating_Point_Format.svg}.png}
+\includegraphics[scale=.1]{img/IEEE_754_Double_Floating_Point_Format.png}
 \end{figure}
 
 {\tiny 参照： \url{https://en.wikipedia.org/wiki/Double-precision\_floating-point\_format}}
@@ -292,5 +292,46 @@ Wikipediaの解説：
   {\tiny \[\mathtt{0.0000000000000000000000000000000000000000000000000001}_{(2)} \times 2^{1101-1023}\]}
 
   したがって、ULPより小さい数を足しても、コンピュータ内部では影響がない。
+\end{frame}
+\begin{frame}[fragile]
+実行例
+{\fontsize{8pt}{8pt}\selectfont
+\begin{verbatim}
+>>> import math
+>>> a = 6.02e23
+>>> math.ulp(a)
+67108864.0
+>>> a+1
+6.02e+23
+>>> a+1 == a
+True
+>>> a+100 == a
+True
+>>> a+10000 == a
+True
+>>> a+67108864.0 == a
+False
+\end{verbatim}
+}
+\end{frame}
+\begin{frame}[fragile]
+  以下mathとNumPyの最近のアップデートについて、数学的な注目点を説明します
+  
+  （変更点は大量にありますが、主に数学的な視点でピックアップします）
+\end{frame}
+\begin{frame}[fragile]{mathの新規追加関数}
+  Python 3.11で次の関数が追加された。
+  \begin{itemize}
+  \item verb|math.cbrt| : 三乗根$\sqrt[3]{x}$を計算
+  \item verb|math.exp2| : 2のべき乗$2^x$を計算
+  \end{itemize}
+  しかし、これらは本当に必要？
+
+  →Yes! すでにCで実装されており、従来の計算法より正確に計算できる。
+\end{frame}
+\begin{frame}[fragile]{{\tt math.pow}の仕様変更}
+\end{frame}
+\begin{frame}[fragile]{{\tt numpy.percentie}, {\tt numpy.quantile}}
+  Ver 1.22.0
 \end{frame}
 \end{document}
