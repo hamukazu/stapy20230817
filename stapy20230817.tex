@@ -173,10 +173,10 @@ mathにあってnumpyにない関数の一覧を取得してみる。
 以下（網羅的ではなく）中身を見ていきます。
 \end{frame}
 \begin{frame}[fragile]{逆三角関数と逆双曲線関数}
-  $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、$\mathrm{arcsin}$と書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
+  $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、arcsinと書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
 
   
-  $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、$\mathrm{arcsinh}$と書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
+  $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、arcsinhと書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
 
   以上、機能としては同じだが関数名が異なっている。
 \end{frame}
@@ -249,11 +249,33 @@ Wikipediaの解説：
 
 符号は0:プラス、1:マイナス
 
-指数部を符号なし11ビットとみなした数を$e$とすると、$e-1023$が指数となる（$-1023$以上$1024$以下を表現できる）
+指数部を符号なし11ビットとみなした数を$e$とすると、$e-1023$が指数となる（11ビットでは0から2047までの数を表せるが、0と2047は特別扱いとし、それ以外は$e-1023$を指数とする）
 
 仮数は一の位が1として、残りの52ビットを仮数部で表現する。
 
 \[ (-1)^\mathrm{sign} \times (1.b_{51} b_{50} \cdots b_{0})_{(2)} \times 2^{e-1023} \]
+\end{frame}
+\begin{frame}[fragile]
+全ビットをゼロにしたものが0.0で、符号部を1にしてそれ以外を0にしたものが-0.0（0.0と-0.0は別）
+
+{\tiny\tt
+\begin{tabbing}
+    -0.0 \=: (1 00000000000 0000000000000000000000000000000000000000000000000000)\kill
+    0.0 \>: (0 00000000000 0000000000000000000000000000000000000000000000000000)\\
+    -0.0 \>: (1 00000000000 0000000000000000000000000000000000000000000000000000)
+  \end{tabbing}
+}
+指数部の全ビットを1にして仮数部の全ビットを0にしたのが$\pm\text{inf}$、仮数部に1があるのが{\tt nan}
+{\tiny\tt
+\begin{tabbing}
+    0.0 \=: (1 00000000000 0000000000000000000000000000000000000000000000000000)\kill
+    inf \>: (0 11111111111 0000000000000000000000000000000000000000000000000000)\\
+    -inf \>: (1 11111111111 0000000000000000000000000000000000000000000000000000)\\
+    nan \>: (0 11111111111 1000000000000000000000000000000000000000000000000000)
+  \end{tabbing}
+}
+
+
 \end{frame}
 \begin{frame}[fragile]
   例：アボガドロ数（の近似値）$6.02\times 10^{23}$はコンピュータ内部表現ではどうなっているか。
@@ -276,7 +298,7 @@ Wikipediaの解説：
 ほんとかな？検算してみよう！
 {\fontsize{6pt}{6pt}\selectfont    
 \begin{verbatim}
->>> 0b11111110111101001111100010000101010001101001101100001/2**52 * 2**78
+>>> 0b1_1111110111101001111100010000101010001101001101100001/2**52 * 2**78
 6.02e+23
 \end{verbatim}
 }
@@ -322,16 +344,134 @@ False
 \begin{frame}[fragile]{mathの新規追加関数}
   Python 3.11で次の関数が追加された。
   \begin{itemize}
-  \item verb|math.cbrt| : 三乗根$\sqrt[3]{x}$を計算
-  \item verb|math.exp2| : 2のべき乗$2^x$を計算
+  \item \verb|math.cbrt| : 立方根（三乗根）$\sqrt[3]{x}$を計算
+  \item \verb|math.exp2| : 2のべき乗$2^x$を計算
   \end{itemize}
-  しかし、これらは本当に必要？
+  これらは本当に必要？
 
-  →Yes! すでにCで実装されており、従来の計算法より正確に計算できる。
+  立方根は\verb|x**(1/3)|で計算できるし、2のベキは\verb|2**x|でいいのでは？
+
+  →Cのmathにあるから追加すべきというのが理由の一つだが、他にも理由がある（後で説明）
+\end{frame}
+\begin{frame}[fragile]{ここでちょっと寄り道}
+  \verb|**|と\verb|pow|と\verb|math.pow|の違いわかりますか？\vspace{7mm}
+
+  
+  \verb|pow|と\verb|math.pow|には第3引数があり、第3引数が与えられたときの\verb|pow|と\verb|math.pow|は同じ動作で、\verb|pow(n,k,m)|は引数がすべて整数であるときのみ有効で、$n^k \mod m$を意味する。
+
+  第3引数が与えられないときの\verb|pow|と\verb|**|は同じで、\verb|math.pow|とは仕様が少し異なる。
+
+  \verb|a|が負で\verb|b|が非整数の場合\verb|a**b|は複素数を返し、\verb|math.pow(a,b)|はエラーになる。
+
+  （\verb|math.pow(a,b)|は値域が実数値になる指数関数に仕様を合わせている）
+\end{frame}
+\begin{frame}[fragile]
+  実行例：
+\fontsize{8pt}{8pt}\selectfont
+\begin{verbatim}
+>>> import math
+>>> pow(2,3,5)
+3
+>>> (-1)**(1/2)
+(6.123233995736766e-17+1j)
+>>> pow(-1,1/2)
+(6.123233995736766e-17+1j)
+>>> math.pow(-1, 1/2)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: math domain error
+\end{verbatim}
+\end{frame}
+\begin{frame}[fragile]{{\tt math.cbrt}の必要性}
+
+    {\tiny 該当するGitHubでの議論： \url{https://github.com/python/cpython/issues/88523}}
+
+  
+  従来だと負の数の立方根を求めるのがとても不便。
+
+  例：
+  $\sqrt[3]{-8}=-2$だが...
+
+{\fontsize{8pt}{8pt}\selectfont
+\begin{verbatim}
+>>> import math
+>>> (-8)**(1/3)
+(1.0000000000000002+1.7320508075688772j)
+>>> math.pow(-8,1/3)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: math domain error
+>>> math.cbrt(-8)
+-2.0
+\end{verbatim}
+}
+\end{frame}
+\begin{frame}[fragile]{{\tt math.exp2}の必要性}
+  
+  {\tiny 該当するGitHubの議論：\url{https://github.com/python/cpython/issues/90075}}
+
+  GitHubでは、\verb|math.pow|を使うより正確に計算できるという主張がなされているが、実験してみたところそうでもないらしい。
+
+  Cのmathにあるからというのが唯一の理由？
 \end{frame}
 \begin{frame}[fragile]{{\tt math.pow}の仕様変更}
+  
+  Python 3.11から、\verb|math.pow(0.0,-inf)|と\verb|math.pow(-0.0,-inf)|は\verb|inf|を返すようになった（以前のバージョンではValueErrorになった）
+
+  理由：IEEE 754でそう決められているから。
+
+  ではなぜIEEEではそう決められているのか。
 \end{frame}
-\begin{frame}[fragile]{{\tt numpy.percentie}, {\tt numpy.quantile}}
-  Ver 1.22.0
+\begin{frame}[fragile]
+  仕様の確認：
+  \verb|math.pow(a,b)|は値域が実数になる前提で考えている。
+  \begin{itemize}
+  \item \verb|a|が負のときは\verb|b|が整数のときのみ計算でき、それ以外はエラーになる。
+  \item \verb|a|が正のときは\verb|b|は実数ならば何でもよい
+  \end{itemize}
+
+  では\verb|a|が0のときは？
+  \begin{itemize}
+  \item ${\tt b}\neq 0$かつ有限ならば、\verb|math.pow(0.0,b)=0.0|
+  \item \verb|math.pow(0.0,0.0)=1.0| （$\lim_{a\to 0} a^0=1$だから）
+  \item \verb|math.pow(0.0,inf)=0.0|
+    （$0<a<1$のとき、$\lim_{b\to \infty} a^b=0$なので、$a\to +0$を考える）
+  \item {[今回の仕様変更]} \verb|math.pow(0.0,-inf)=inf|
+    （$0<a<1$のとき、$\lim_{b\to -\infty} a^b=\infty$なので、$a\to +0$を考える）
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]{{\tt numpy.percentile}, {\tt numpy.quantile}}
+  NumPy ver 1.22.0で新しい引数\verb|method|が加えられた。
+
+  {\tt numpy.percentile}と{\tt numpy.quantile}は、パーセントで指定するか割合（$[0,1]$）で指定するかの違いだけで、他に違いはない。
+
+  指定したパーセンタイルにぴったり数字が当てはまらないときは補間が必要だが、補間の仕方を\verb|method|で指定。
+\end{frame}
+\begin{frame}[fragile]
+  methodのオプション一覧：
+  {\tiny
+  \begin{enumerate}
+  \item ``inverted\_cdf''
+  \item ``averaged\_inverted\_cdf''
+  \item ``closest\_observation''
+  \item ``interpolated\_inverted\_cdf''
+  \item ``hazen''
+  \item ``weibull''
+  \item ``linear'' (default)
+  \item ``median\_unbiased''
+  \item ``normal\_unbiased''
+  \end{enumerate}
+  }
+  これらそれぞれがどういう意味かというのは、NumPyのドキュメントには論文参照と書かれている。
+
+  論文：R. J. Hyndman and Y. Fan, “Sample quantiles in statistical packages,” The American Statistician, 50(4), pp. 361-365, 1996
+\end{frame}
+\begin{frame}[fragile]{まとめ}
+  \begin{itemize}
+  \item sinなどの数学的関数は、NumPyが使える環境ならNumPyを使おう
+  \item 浮動小数点数の内部構造について知っていると、数値計算関数の仕様の理解に役立つこともある
+  \item 数学的計算をする関数の仕様は、数学の理論の観点から「自然な」仕様に決められていることが多い
+  \item なぜそういう仕様になっているか知りたければ、GitHubのIssueでの議論を追えばよい
+  \end{itemize}
 \end{frame}
 \end{document}
