@@ -8,7 +8,7 @@
 \usepackage{geometry}
 \usepackage{graphicx}
 \title{{\tt math}と{\tt NumPy}の話}
-\subtitle{みんなのPython勉強会資料}
+\subtitle{みんなのPython勉強会 2023/8/17}
 \date{}
 \author{加藤公一}
 \begin{document}
@@ -16,6 +16,22 @@
  \titlepage
 \end{frame}
 \begin{frame}[fragile]{自己紹介}
+  
+  加藤公一（かとうきみかず）
+
+  所属：ソフトバンク株式会社
+
+  仕事：機械学習エンジニア兼データサイエンティスト
+
+  著書：「機械学習のエッセンス」
+
+\begin{figure}[!ht]
+  \includegraphics[scale=.2]{img/mlessence.jpeg}
+\end{figure}
+\begin{center}
+  \url{https://bit.ly/mlessence}
+\end{center}
+
 \end{frame}
 \begin{frame}[fragile]{今日の話}
   PythonのライブラリmathとNumPyについて
@@ -405,6 +421,25 @@ ValueError: math domain error
 -2.0
 \end{verbatim}
 }
+\end{frame}
+\begin{frame}[fragile]
+  参考：$a$が複素数、$b$が実数のときの\verb|a**b|の計算アルゴリズム\newline
+  （＝$a$が負で、$b$が非整数のときのアルゴリズム）
+
+  まず、$a$の絶対値$\alpha$と偏角$\theta$を求める。つまり$a=\alpha (\cos\theta + i \sin\theta)$となる。
+  
+  あとは以下の式で計算：
+  \[
+    a^b = \alpha^b (\cos\theta + i \sin\theta)^b
+    =\alpha^b (\cos b\theta + i \sin b\theta)
+  \]
+
+  例：
+  $a=-2$, $b=1/3$のときは$\alpha=2,\,\theta=\pi$となるので\verb|a**b|は、
+  \[
+    2^{1/3} (\cos \pi/3 + i \sin \pi/3)
+    =\sqrt[3]{2}\left( \frac{1}{2} + \frac{\sqrt{3}}{2}i \right)
+  \]  
 \end{frame}
 \begin{frame}[fragile]{{\tt math.exp2}の必要性}
   
