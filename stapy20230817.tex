@@ -43,6 +43,13 @@
   \item mathとNumPyの最近の進化
   \end{itemize}
 \end{frame}
+\begin{frame}[fragile]{この資料について}
+
+  Latex + Beamerで書かれています。
+  
+  オープンソースで公開しています：\newline
+  \url{https://github.com/hamukazu/stapy20230817}
+\end{frame}
 \begin{frame}[fragile]{mathとは？}
   オフィシャルサイトの説明：
   \begin{quote}
@@ -54,10 +61,12 @@
   {\tt math}はPythonの\emph{標準ライブラリ}（つまりPythonをインストールするとついてくる）
 \end{frame}
 \begin{frame}[fragile]{C言語のmathライブラリについて}
+  
   C言語のmathライブラリの関数一覧はWikipedia参照：\newline
   {\tiny \url{https://en.wikipedia.org/wiki/C\_mathematical\_functions}}
 
-$\cos(\pi)$をCとPythonで計算してみる。
+  $\cos(\pi)$をCとPythonで計算してみる。
+  
 \begin{minipage}[t]{0.45 \textwidth}
 \fontsize{6pt}{6pt}\selectfont    
 \noindent  
@@ -189,7 +198,7 @@ mathにあってnumpyにない関数の一覧を取得してみる。
 以下（網羅的ではなく）中身を見ていきます。
 \end{frame}
 \begin{frame}[fragile]{逆三角関数と逆双曲線関数}
-  $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、arcsinと書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
+  $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、$\arcsin$と書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
 
   
   $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、arcsinhと書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
@@ -197,6 +206,7 @@ mathにあってnumpyにない関数の一覧を取得してみる。
   以上、機能としては同じだが関数名が異なっている。
 \end{frame}
 \begin{frame}[fragile]{mathにあり、numpyにはないが、scipyにはあるもの}
+  
   \verb|math.factorial| → \verb|scipy.special.factorial| （$n!$）
   
   \verb|math.comb| → \verb|scipy.special.comb| （${}_n C_k$）
@@ -498,13 +508,63 @@ ValueError: math domain error
   \item ``normal\_unbiased''
   \end{enumerate}
   }
-  これらそれぞれがどういう意味かというのは、NumPyのドキュメントには論文参照と書かれている。
+  これらそれぞれがどういう意味かというのは、NumPyのドキュメントには論文参照と書かれている。これらのオプションはR言語ですでに実装されているので、それを参考にしている。
 
   論文：R. J. Hyndman and Y. Fan, “Sample quantiles in statistical packages,” The American Statistician, 50(4), pp. 361-365, 1996
+\end{frame}
+\begin{frame}[fragile]{論文の概説}
+
+  {\tiny R. J. Hyndman and Y. Fan, “Sample quantiles in statistical packages,” The American Statistician, 50(4), pp. 361-365, 1996}
+  
+  以下quantile（分位点）の方で話を進める。割合$p$に対するquantileを考える（$p=0.5$のときが中央値で、$p=0.25$が第1四分位数、$p=0.75$が第3四分位数）。
+
+  基本的なアイデア：ソートされたデータ$X_{(1)},X_{(2)},\ldots,X_{(n)}$があるとして、割合$p$に当たるインデックス$j$をピッタリと選べれば$X_{(j)}$が答えになり、そうでなければ、割合$p$に近い$j$について$X_{(j)}$と$X_{(j+1)}$で補間をとればよい。このインデックス$j$をどう取るかと、補間をどう計算するかの選択でいくつかのアルゴリズムが存在する。
+
+  割合$p$に対するquantile $Q(p)$は以下の式で与えられる。
+
+  $\displaystyle \frac{j-m}{n} \leq p < \frac{j-m+1}{n}$のとき
+  $Q(p) = (1-\gamma) X_{(j)} + \gamma X_{(j+1)}$
+
+  ただし、$\gamma$は$j=\lfloor pn+m \lfloor$と$g=pn+m-j$の関数であり、$m$は定数である。$\gamma$と$m$の選び方でアルゴリズムが決定される。
+  
+\end{frame}
+\begin{frame}[fragile]
+  
+  具体例：
+  
+  データ[10,20,30,40,50,60,70,80,90]の第1四分位数（$p=0.25$）は何でしょう？
+
+  中間値が50である。
+
+  「中間値を含んだ前半[10,20,30,40,50]の中間値30が第1四分位数である」（この場合$m=1-p$）という考え方もあるし...\newline
+  「中間値を含まない前半[10,20,30,40]の中間値（の補間）25が第1四分位数である」（この場合$m=p$）という考え方もある。
+  
+\end{frame}
+\begin{frame}[fragile]
+  
+  実行例：
+
+{\fontsize{8pt}{8pt}\selectfont
+\begin{verbatim}
+>>> import numpy as np
+>>> a = np.arange(10.,100,10)
+>>> a
+array([10., 20., 30., 40., 50., 60., 70., 80., 90.])
+>>> np.quantile(a,0.25,method="linear")
+30.0
+>>> np.quantile(a,0.25,method="weibull")
+25.0
+>>> np.quantile(a,0.25,method="inverted_cdf")
+30.0
+>>> np.quantile(a,0.25,method="hazen")
+27.5
+\end{verbatim}
+}
 \end{frame}
 \begin{frame}[fragile]{まとめ}
   \begin{itemize}
   \item sinなどの数学的関数は、NumPyが使える環境ならNumPyを使おう
+  \item mathもNumPyも、いまでも進化しつづけている
   \item 浮動小数点数の内部構造について知っていると、数値計算関数の仕様の理解に役立つこともある
   \item 数学的計算をする関数の仕様は、数学の理論の観点から「自然な」仕様に決められていることが多い
   \item なぜそういう仕様になっているか知りたければ、GitHubのIssueでの議論を追えばよい
