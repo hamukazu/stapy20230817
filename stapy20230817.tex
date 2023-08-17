@@ -11,6 +11,7 @@
 \subtitle{みんなのPython勉強会 2023/8/17}
 \date{}
 \author{加藤公一}
+  \DeclareMathOperator{\arcsinh}{arcsinh}
 \begin{document}
 \begin{frame}
  \titlepage
@@ -198,10 +199,11 @@ mathにあってnumpyにない関数の一覧を取得してみる。
 以下（網羅的ではなく）中身を見ていきます。
 \end{frame}
 \begin{frame}[fragile]{逆三角関数と逆双曲線関数}
+  
   $\sin$の逆関数（数学では$\sin^{-1}$と書いたり、$\arcsin$と書いたりする）は、mathでは\verb|asin|であり、numpyでは\verb|arcsin|である。
 
   
-  $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、arcsinhと書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
+  $\sinh$の逆関数（数学では$\sinh^{-1}$と書いたり、$\arcsinh$と書いたりする）は、mathでは\verb|asinh|であり、numpyでは\verb|arcsinh|である。
 
   以上、機能としては同じだが関数名が異なっている。
 \end{frame}
